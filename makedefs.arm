@@ -1,0 +1,244 @@
+#******************************************************************************
+#
+# makedefs.arm - Definitions common to all makefiles.
+#
+# Copyright (c) 2012,2013 Roger Ye.  All rights reserved.
+# Software License Agreement
+# 
+# 
+# THIS SOFTWARE IS PROVIDED "AS IS" AND WITH ALL FAULTS.
+# NO WARRANTIES, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT
+# NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. The AUTHOR SHALL NOT, UNDER
+# ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
+# DAMAGES, FOR ANY REASON WHATSOEVER.
+#
+#******************************************************************************
+
+#******************************************************************************
+#
+# Get the operating system name.  If this is Cygwin, the .d files will be
+# munged to convert c: into /cygdrive/c so that "make" will be happy with the
+# auto-generated dependencies.
+#
+#******************************************************************************
+os:=${shell uname -s}
+
+#******************************************************************************
+#
+# Define the root of toolchain.
+#
+#******************************************************************************
+ifndef TOOLROOT
+TOOLROOT=${HOME}/arm-2012.03
+#TOOLROOT=${HOME}/CodeSourcery/Sourcery_CodeBench_Lite_for_ARM_EABI
+endif
+
+#******************************************************************************
+#
+# The compiler to be used.
+#
+#******************************************************************************
+ifndef COMPILER
+COMPILER=gcc
+endif
+
+#******************************************************************************
+#
+# Definitions for using GCC.
+#
+#******************************************************************************
+ifeq (${COMPILER}, gcc)
+
+#
+# Get the prefix for the tools to use.  Use arm-stellaris-eabi if it exists,
+# otherwise fall back to arm-none-eabi.
+#
+PREFIX=${shell type arm-eabi-gcc > /dev/null 2>&1 && \
+         echo arm-stellaris-eabi || echo arm-none-eabi}
+# PREFIX=arm-eabi
+
+#
+# The command for calling the compiler.
+#
+CC=${PREFIX}-gcc
+
+#
+# The location of the C compiler
+# ARMGCC_ROOT is used by some makefiles that need to know where the compiler
+# is installed.  It is not used further for normal stellarisware apps
+#
+ARMGCC_ROOT:=${shell dirname '${shell sh -c "which ${CC}"}'}/..
+
+#
+# Determine the compiler CPU/FPU options based on the processor variant.
+#
+ifndef VARIANT
+CPU=-marm -mno-thumb-interwork -mabi=aapcs-linux -march=armv5te
+FPU=-fno-common -ffixed-r8 -msoft-float -fno-builtin -ffreestanding 
+else
+ifeq (${VARIANT}, cm3)
+CPU=-mcpu=cortex-m3
+FPU=-fno-common -ffixed-r8 -msoft-float
+else
+ifeq (${VARIANT}, cm4f)
+CPU=-mcpu=cortex-m4
+FPU=-mfpu=fpv4-sp-d16 -mfloat-abi=softfp
+else
+$(error Unknown processor variant ${VARIANT}!)
+endif
+endif
+endif
+
+#
+# The flags passed to the assembler.
+#
+AFLAGS=${CPU}  \
+       ${FPU}  \
+       -MD
+
+#
+# The flags passed to the compiler.
+#
+CFLAGS=${CPU}              \
+       ${FPU}              \
+       -Os                 \
+       -fstack-usage       \
+       -fdata-sections     \
+       -MD                 \
+       -Wall               \
+       -Wstrict-prototypes \
+       -Wno-format-nonliteral \
+       -c
+
+#
+# The command for calling the library archiver.
+#
+AR=${PREFIX}-ar
+
+#
+# The command for calling the linker.
+#
+# LD=${PREFIX}-ld
+ifeq (${LD}, arm-none-eabi-gcc)
+LD=${PREFIX}-gcc
+else
+LD=${PREFIX}-ld
+endif
+
+#
+# The flags passed to the linker.
+#
+# LDFLAGS=--gc-sections
+
+#
+# Get the location of libgcc.a from the GCC front-end.
+#
+LIBGCC=${shell ${CC} ${CFLAGS} -print-libgcc-file-name}
+
+#
+# Get the location of libc.a from the GCC front-end.
+#
+LIBC=${shell ${CC} ${CFLAGS} -print-file-name=libc.a}
+
+#
+# Get the location of libm.a from the GCC front-end.
+#
+LIBM=${shell ${CC} ${CFLAGS} -print-file-name=libm.a}
+
+#
+# The command for extracting images from the linked executables.
+#
+OBJCOPY=${PREFIX}-objcopy
+
+#
+# Tell the compiler to include debugging information if the DEBUG environment
+# variable is set.
+#
+ifdef DEBUG
+CFLAGS+=-g -D DEBUG
+AFLAGS+=-g -D DEBUG
+endif
+
+#
+# Add the tool specific CFLAGS.
+#
+CFLAGS+=${CFLAGSgcc}
+
+#
+# Add the include file paths to AFLAGS and CFLAGS.
+#
+AFLAGS+=${patsubst %,-I%,${subst :, ,${IPATH}}}
+CFLAGS+=${patsubst %,-I%,${subst :, ,${IPATH}}}
+
+#
+# The rule for building the object file from each C source file.
+#
+${COMPILER}${SUFFIX}/%.o: %.c
+	@if [ 'x${VERBOSE}' = x ];                            \
+	 then                                                 \
+	     echo "  CC    ${<}";                             \
+	 else                                                 \
+	     echo ${CC} ${CFLAGS} -D${COMPILER} -o ${@} ${<}; \
+	 fi
+	@${CC} ${CFLAGS} -D${COMPILER} -o ${@} ${<}
+ifneq ($(findstring CYGWIN, ${os}), )
+	@sed -i -r 's/ ([A-Za-z]):/ \/cygdrive\/\1/g' ${@:.o=.d}
+endif
+
+#
+# The rule for building the object file from each assembly source file.
+#
+${COMPILER}${SUFFIX}/%.o: %.S
+	@if [ 'x${VERBOSE}' = x ];                               \
+	 then                                                    \
+	     echo "  AS    ${<}";                                \
+	 else                                                    \
+	     echo ${CC} ${AFLAGS} -D${COMPILER} -o ${@} -c ${<}; \
+	 fi
+	@${CC} ${AFLAGS} -D${COMPILER} -o ${@} -c ${<}
+ifneq ($(findstring CYGWIN, ${os}), )
+	@sed -i -r 's/ ([A-Za-z]):/ \/cygdrive\/\1/g' ${@:.o=.d}
+endif
+
+#
+# The rule for creating an object library.
+#
+${COMPILER}${SUFFIX}/%.a:
+	@if [ 'x${VERBOSE}' = x ];     \
+	 then                          \
+	     echo "  AR    ${@}";      \
+	 else                          \
+	     echo ${AR} -cr ${@} ${^}; \
+	 fi
+	@${AR} -cr ${@} ${^}
+
+#
+# The rule for linking the application.
+#
+${COMPILER}${SUFFIX}/%.axf:
+	@if [ 'x${SCATTERgcc_${notdir ${@:.axf=}}}' = x ];                    \
+	 then                                                                 \
+	     ldname="${ROOT}/gcc/standalone.ld";                              \
+	 else                                                                 \
+	     ldname="${SCATTERgcc_${notdir ${@:.axf=}}}";                     \
+	 fi;                                                                  \
+	 if [ 'x${VERBOSE}' = x ];                                            \
+	 then                                                                 \
+	     echo "  LD    ${@} ${LNK_SCP}";                                  \
+	 else                                                                 \
+	     echo ${LD} -T $${ldname}                                         \
+	          --entry ${ENTRY_${notdir ${@:.axf=}}}                       \
+	          ${LDFLAGSgcc_${notdir ${@:.axf=}}}                          \
+	          ${LDFLAGS} -o ${@} $(filter %.o %.a, ${^})                  \
+	          '${LIBM}' '${LIBC}' '${LIBGCC}';                            \
+	     echo ${OBJCOPY} -O binary ${@} ${@:.axf=.bin};                  \
+	 fi;                                                                  \
+	${LD} -T $${ldname}                                                   \
+	      --entry ${ENTRY_${notdir ${@:.axf=}}}                           \
+	      ${LDFLAGSgcc_${notdir ${@:.axf=}}}                              \
+	      ${LDFLAGS} -o ${@} $(filter %.o %.a, ${^})                      \
+	      '${LIBM}' '${LIBC}' '${LIBGCC}'
+	@${OBJCOPY} -O binary ${@} ${@:.axf=.bin}
+endif
+
