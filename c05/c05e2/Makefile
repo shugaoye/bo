@@ -53,14 +53,13 @@ all: ${COMPILER}/${PROJECTNAME}.axf
 #
 debug:
 	@ddd --debugger arm-none-eabi-gdb ${COMPILER}/${PROJECTNAME}.axf &
-	@emulator -verbose -show-kernel -netfast -avd hd2 -shell -qemu -monitor telnet::6666,server -s -S -kernel ${COMPILER}/${PROJECTNAME}.axf
+	@xterm -e "emulator -verbose -show-kernel -netfast -avd hd2 -shell -qemu -s -S -kernel ${COMPILER}/${PROJECTNAME}.axf"
 
 #
 # The rule to debug the target using Android emulator.
 #
-test:
-	@ddd --debugger arm-none-eabi-gdb ${COMPILER}/${PROJECTNAME}.axf &
-	@emulator -verbose -show-kernel -shell-serial tcp::4444,server -avd hd2 -qemu -monitor telnet::6666,server -s -S -kernel ${COMPILER}/${PROJECTNAME}.axf
+nm:
+	@arm-none-eabi-nm -n ${COMPILER}/${PROJECTNAME}.axf
 
 #
 # The rule to clean out all the build products.

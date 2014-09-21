@@ -17,6 +17,27 @@
 
 #include <serial_goldfish.h>
 
+char *uart_name = "goldfish UART 1";
+
+char *strcpy(char *dst,const char *src)
+{
+    if(dst == 0) return 0;
+    if(src == 0) return 0;
+    char *ret = dst;
+    while((* dst++ = * src++) != '\0')
+        ;
+    return ret;
+}
+
+int strlen(const char * s)
+{
+	const char *sc;
+
+	for (sc = s; *sc != '\0'; ++sc)
+		/* nothing */;
+	return sc - s;
+}
+
 /* We will run the unit test of serial driver in main() */
 int main(int argc, char *argv[])
 {
@@ -28,6 +49,11 @@ int main(int argc, char *argv[])
 
 	/* Unit test 2: goldfish_init */
 	drv->start();
+
+	/* Initialize the name of UART */
+	if(strlen(uart_name) < 16) {
+		strcpy(drv->name, uart_name);
+	}
 
 	/* Unit test 3: default_serial_puts & goldfish_putc */
 	if(argc == 1) {
