@@ -188,7 +188,7 @@ SECTIONS
   /* __cs3_region_init_ram = __cs3_region_start_ram; */
   __cs3_region_init_size_ram = _edata - __cs3_region_start_ram;
   __cs3_region_zero_size_ram = _end - _edata;
-  /* Default to 1M of heap */
+  /* Default to 2M of heap */
   __cs3_region_size_ram = ALIGN (1024) - __cs3_region_start_ram + 2M;
 
   .stab 0 (NOLOAD) : { *(.stab) }

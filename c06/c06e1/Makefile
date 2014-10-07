@@ -32,7 +32,7 @@ include ${ROOT}/makedefs.arm
 
 AFLAGS+=-D__BARE_METAL__
 CFLAGS+=-D__BARE_METAL__ -D__USE_CLIB__
-LDFLAGS+=-L${TOOLROOT}/arm-none-eabi/lib -L${TOOLROOT}/lib/gcc/arm-none-eabi/4.6.3
+LDFLAGS+=-L${TOOLROOT}/arm-none-eabi/lib -L${TOOLROOT}/lib/gcc/arm-none-eabi/4.8.1
 
 #
 # Where to find source files that do not live in this directory.
@@ -57,7 +57,13 @@ all: ${COMPILER}/${PROJECTNAME}.axf
 #
 debug:
 	ddd --debugger arm-none-eabi-gdb ${COMPILER}/${PROJECTNAME}.axf &
-	emulator -verbose -show-kernel -netfast -avd hd2 -shell -qemu -monitor telnet::6666,server -s -S -kernel ${COMPILER}/${PROJECTNAME}.axf
+	@xterm -e "emulator -verbose -show-kernel -netfast -avd hd2 -shell -qemu -s -S -kernel ${COMPILER}/${PROJECTNAME}.axf"
+
+#
+# The rule to debug the target using Android emulator.
+#
+nm:
+	@arm-none-eabi-nm -n ${COMPILER}/${PROJECTNAME}.axf
 
 #
 # The rule to clean out all the build products.

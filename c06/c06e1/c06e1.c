@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * uart3.c - UART test with C library support
+ * c06e1.c - UART test with C library support
  *
  * Copyright (c) 2013 Roger Ye.  All rights reserved.
  * Software License Agreement
