@@ -37,6 +37,7 @@
 #ifndef __BARE_METAL__
 #include <linux/types.h>
 #else
+#include <stdint.h>
 int printf ( const char * format, ... );
 #define debug(fmt, args...) printf(fmt, ## args)
 
@@ -79,8 +80,9 @@ typedef		__s8		int8_t;
 typedef		__u16		u_int16_t;
 typedef		__s16		int16_t;
 typedef		__u32		u_int32_t;
-typedef		__s32		int32_t;
-
+/*
+typedef		__s32		int32_t; 
+*/
 typedef long long       loff_t;
 typedef u32 phys_addr_t;
 

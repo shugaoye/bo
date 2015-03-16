@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <sys/unistd.h>
 #include <hardware.h>
 #include <arm_exc.h>

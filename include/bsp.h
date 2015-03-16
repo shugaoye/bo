@@ -16,13 +16,14 @@
  *****************************************************************************/
 #ifndef bsp_h
 #define bsp_h
+#include <stdint.h>
 
 typedef __signed__ char int8_t;
 typedef unsigned char uint8_t;
 
 typedef __signed__ short int16_t;
 typedef unsigned short uint16_t;
-
+/*
 typedef __signed__ int int32_t;
 typedef unsigned int uint32_t;
 
@@ -30,7 +31,7 @@ typedef __signed__ long int64_t;
 typedef unsigned long u_int64_t;
 
 typedef unsigned long uint64_t;
-
+*/
 typedef unsigned long ulong;
 
 #define __iomem
