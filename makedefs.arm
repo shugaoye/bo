@@ -30,8 +30,7 @@ os:=${shell uname -s}
 #
 #******************************************************************************
 ifndef TOOLROOT
-TOOLROOT=${HOME}/arm-2012.03
-#TOOLROOT=${HOME}/CodeSourcery/Sourcery_CodeBench_Lite_for_ARM_EABI
+TOOLROOT=${HOME}/arm-2013.11
 endif
 
 #******************************************************************************

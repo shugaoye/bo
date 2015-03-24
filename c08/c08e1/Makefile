@@ -30,7 +30,7 @@ include ${ROOT}/makedefs.arm
 
 CFLAGS+=-D__BARE_METAL__ -D__USE_CLIB__
 AFLAGS+=-D__BARE_METAL__
-LDFLAGS+=-L${TOOLROOT}/arm-none-eabi/lib -L${TOOLROOT}/lib/gcc/arm-none-eabi/4.6.3
+LDFLAGS+=-L${TOOLROOT}/arm-none-eabi/lib -L${TOOLROOT}/lib/gcc/arm-none-eabi/4.8.1
 
 #
 # Where to find source files that do not live in this directory.
@@ -54,7 +54,7 @@ all: ${COMPILER}/${PROJECTNAME}.axf
 #
 debug:
 	ddd --debugger arm-none-eabi-gdb ${COMPILER}/${PROJECTNAME}.axf &
-	emulator -verbose -show-kernel -netfast -avd hd2 -shell -system ../../../../build/bin/system.img -qemu -monitor telnet::6666,server -s -S -kernel ${COMPILER}/${PROJECTNAME}.axf
+	emulator -verbose -show-kernel -netfast -avd hd2 -shell -qemu -s -S -kernel ${COMPILER}/${PROJECTNAME}.axf
 
 # This make target uses bin file to simulate a rom image
 debug_bin:
