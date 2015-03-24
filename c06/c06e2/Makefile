@@ -40,8 +40,9 @@ all: ${COMPILER}/${PROJECTNAME}.axf
 # The rule to debug the target using Android emulator.
 #
 debug:
+	./setup_sdk.sh
 	ddd --debugger arm-none-eabi-gdb ${COMPILER}/${PROJECTNAME}.axf &
-	emulator -verbose -show-kernel -avd hd2 -qemu -s -S -semihosting -kernel ${COMPILER}/${PROJECTNAME}.axf
+	bin/emulator -verbose -show-kernel -avd hd2 -qemu -s -S -semihosting -kernel ${COMPILER}/${PROJECTNAME}.axf
 
 #
 # The rule to debug the target using Android emulator.
@@ -55,6 +56,7 @@ nm:
 clean:
 	@rm -f log.txt
 	@rm -rf ${COMPILER} ${wildcard *~}
+	@rm -rf ./bin
 
 #
 # The rule to create the target directory.
