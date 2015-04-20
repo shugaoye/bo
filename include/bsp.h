@@ -101,8 +101,12 @@ static inline void writeq(unsigned int b, volatile void __iomem *addr)
 	*(volatile unsigned long long __force *) addr = b;
 }
 
+#ifdef __USE_CLIB__
 int printf ( const char * format, ... );
 #define debug(fmt, args...) printf(fmt, ## args)
+#else
+#define debug(fmt, args...)
+#endif /* __USE_CLIB__ */
 
 void EnterUserMode(void);
 void SystemCall(void);

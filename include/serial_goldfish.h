@@ -18,12 +18,15 @@
 #ifdef __BARE_METAL__
 /* remove this, when port to u-boot */
 #define uint32_t unsigned int
+
+/* 
 #ifdef __USE_CLIB__
 int printf ( const char * format, ... );
 #define debug(fmt, args...) printf(fmt, ## args)
 #else
 #define debug(fmt, args...)
-#endif /* __USE_CLIB__ */
+#endif __USE_CLIB__ */
+
 struct serial_device *default_serial_console(void);
 void default_serial_puts(const char *s);
 
